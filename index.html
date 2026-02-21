@@ -41,7 +41,6 @@
   --radius-sm: 5px;
   --radius-lg: 12px;
 }
-
 html, body {
   height: 100%;
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1586,6 +1585,9 @@ function createProject() {
 
   const p = { id: uid(), name, industry, status, description, created_at: new Date().toISOString(), brd_count: 0 };
   DB.addProject(p);
+  if (window.saveProjectToCloud) {
+  saveProjectToCloud(p);
+}
   closeModal('newProjectModal');
   document.getElementById('newProjectName').value = '';
   document.getElementById('newProjectDesc').value = '';
@@ -2373,6 +2375,26 @@ function exportBrd() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderDashboard();
 renderSidebar();
+</script>
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Replace DB.addProject
+window.saveProjectToCloud = async function(project) {
+  await addDoc(collection(db, "projects"), project);
+  document.getElementById("dbStatus").textContent = "Cloud Connected";
+  document.getElementById("dbStatus").className = "badge badge-green";
+};
 </script>
 </body>
 </html>
